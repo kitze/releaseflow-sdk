@@ -88,15 +88,32 @@ function getGlobalOptions(command: Command): GlobalOptions {
   return {};
 }
 
-function authedAction(
+function isCommand(value: unknown): value is Command {
+  return (
+    value instanceof Command ||
+    (typeof value === "object" &&
+      value !== null &&
+      "opts" in value &&
+      typeof (value as { opts?: unknown }).opts === "function")
+  );
+}
+
+function getCommandFromArgs(args: unknown[]): Command {
+  const command = [...args].reverse().find(isCommand);
+  if (!command) {
+    throw new Error("Missing command context");
+  }
+  return command;
+}
+
+async function runAuthed(
+  command: Command,
   action: (options: GlobalOptions) => Promise<unknown>,
-): (options: unknown, command: Command) => Promise<void> {
-  return async (_options, command) => {
-    initializeFromEnv();
-    const globalOptions = getGlobalOptions(command);
-    const data = await action(globalOptions);
-    output(data, globalOptions);
-  };
+): Promise<void> {
+  initializeFromEnv();
+  const globalOptions = getGlobalOptions(command);
+  const data = await action(globalOptions);
+  output(data, globalOptions);
 }
 
 const program = new Command("releaseflow")
@@ -111,14 +128,16 @@ const apps = program.command("apps").description("Manage apps");
 apps
   .command("list")
   .description("List apps")
-  .action(authedAction(() => request("/apps")));
+  .action((...args: unknown[]) =>
+    runAuthed(getCommandFromArgs(args), () => request("/apps")),
+  );
 
 apps
   .command("get")
   .argument("<slug>", "App slug")
   .description("Get an app by slug")
-  .action((slug: string, _options: unknown, command: Command) =>
-    authedAction(() => request(`/apps/${slug}`))(_options, command),
+  .action((slug: string, ...args: unknown[]) =>
+    runAuthed(getCommandFromArgs(args), () => request(`/apps/${slug}`)),
   );
 
 apps
@@ -134,34 +153,34 @@ apps
       slug: string,
       githubRepo: string,
       options: { type: string },
-      command: Command,
+      ...args: unknown[]
     ) =>
-      authedAction(() =>
+      runAuthed(getCommandFromArgs(args), () =>
         request("/apps", {
           method: "POST",
           body: JSON.stringify({ name, slug, githubRepo, type: options.type }),
         }),
-      )(options, command),
+      ),
   );
 
 apps
   .command("sync")
   .argument("<appId>", "App ID")
   .description("Sync releases from GitHub")
-  .action((appId: string, _options: unknown, command: Command) =>
-    authedAction(() =>
+  .action((appId: string, ...args: unknown[]) =>
+    runAuthed(getCommandFromArgs(args), () =>
       request(`/apps/${appId}/sync`, {
         method: "POST",
       }),
-    )(_options, command),
+    ),
   );
 
 apps
   .command("urls")
   .argument("<slug>", "App slug")
   .description("Get download and update URLs")
-  .action((slug: string, _options: unknown, command: Command) =>
-    authedAction(() => request(`/apps/${slug}/urls`))(_options, command),
+  .action((slug: string, ...args: unknown[]) =>
+    runAuthed(getCommandFromArgs(args), () => request(`/apps/${slug}/urls`)),
   );
 
 const releases = program.command("releases").description("Manage releases");
@@ -183,9 +202,9 @@ releases
         enable?: boolean;
         disable?: boolean;
       },
-      command: Command,
+      ...args: unknown[]
     ) =>
-      authedAction(() => {
+      runAuthed(getCommandFromArgs(args), () => {
         const body: Record<string, unknown> = {
           notes: readNotes(options.notes),
         };
@@ -206,19 +225,19 @@ releases
           method: "PATCH",
           body: JSON.stringify(body),
         });
-      })(options, command),
+      }),
   );
 
 releases
   .command("toggle")
   .argument("<releaseId>", "Release ID")
   .description("Toggle release availability")
-  .action((releaseId: string, _options: unknown, command: Command) =>
-    authedAction(() =>
+  .action((releaseId: string, ...args: unknown[]) =>
+    runAuthed(getCommandFromArgs(args), () =>
       request(`/releases/${releaseId}/toggle`, {
         method: "POST",
       }),
-    )(_options, command),
+    ),
   );
 
 releases
@@ -232,16 +251,16 @@ releases
       options: {
         force?: boolean;
       },
-      command: Command,
+      ...args: unknown[]
     ) => {
       if (!options.force) {
         throw new Error("Refusing to delete without --force");
       }
-      return authedAction(() =>
+      return runAuthed(getCommandFromArgs(args), () =>
         request(`/releases/${releaseId}`, {
           method: "DELETE",
         }),
-      )(options, command);
+      );
     },
   );
 
@@ -251,13 +270,16 @@ program
   .argument("<path>", "API path, for example /apps")
   .argument("[json]", "Optional JSON body")
   .description("Make a raw ReleaseFlow REST request")
-  .action((method: string, path: string, rawBody: string | undefined, command: Command) =>
-    authedAction(() =>
+  .action((method: string, path: string, ...args: unknown[]) => {
+    const command = getCommandFromArgs(args);
+    const rawBody = args.find((arg): arg is string => typeof arg === "string");
+
+    return runAuthed(command, () =>
       request(path, {
         method: method.toUpperCase(),
         body: rawBody ? JSON.stringify(parseJson(rawBody)) : undefined,
       }),
-    )(undefined, command),
-  );
+    );
+  });
 
 program.parseAsync(process.argv).catch(handleError);

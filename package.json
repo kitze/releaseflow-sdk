@@ -1,0 +1,14 @@
+{
+  "name": "releaseflow-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "generate": "pnpm --filter releaseflow-sdk generate"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "pnpm": ">=9"
+  }
+}

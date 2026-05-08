@@ -48,4 +48,4 @@ Use `--changelog-url` for hosted long-form notes when useful, but still keep `no
 
 ## MCP Boundary
 
-This SDK repo does not package MCP. MCP belongs in the app codebase and is hosted by the product at `/mcp`, layered over the app API. For ReleaseFlow, use `https://releaseflow.net/mcp` when a hosted MCP connection is needed.
+This SDK repo does not package MCP. MCP belongs in the app codebase and is hosted by the product at `/api/mcp`, layered over the app API. For ReleaseFlow, use `https://releaseflow.net/api/mcp` when a hosted MCP connection is needed.

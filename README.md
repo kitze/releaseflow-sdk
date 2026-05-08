@@ -8,7 +8,7 @@ This public repo contains:
 - `releaseflow-cli`: command line interface for apps, releases, syncs, and changelogs
 - `SKILL.md`: agent skill instructions for `npx skills add kitze/releaseflow-sdk`
 
-MCP is intentionally not packaged here. ReleaseFlow hosts its app-level MCP from the product codebase at `https://releaseflow.net/mcp`.
+MCP is intentionally not packaged here. ReleaseFlow hosts its app-level MCP from the product codebase at `https://releaseflow.net/api/mcp`.
 
 ## Install
 

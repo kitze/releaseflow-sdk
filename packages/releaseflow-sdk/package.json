@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/kitze/releaseflow-sdk#readme",
   "devDependencies": {
-    "@hey-api/openapi-ts": "0.90.0",
+    "@hey-api/openapi-ts": "0.97.1",
     "@types/node": "^22.0.0",
     "typescript": "^5.5.0"
   }

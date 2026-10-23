@@ -185,7 +185,12 @@ Official TypeScript SDK, CLI, and agent skill for ReleaseFlow
       <strong><a href="https://linkdr.com/?ref=kitze%2Freleaseflow-sdk">LinkDR</a></strong><br>
       Link building that works: real backlinks from hundreds of high-DR sites, done for you or self-serve.
     </td>
-    <td width="67%" colspan="2" valign="top">
+    <td width="33%" valign="top">
+      <a href="https://outmano.com/?ref=kitze%2Freleaseflow-sdk"><img src="https://outmano.com/icon-512.png" width="40" alt="Outmano logo"></a><br>
+      <strong><a href="https://outmano.com/?ref=kitze%2Freleaseflow-sdk">Outmano</a></strong><br>
+      AI agents that watch your competitors so you don&#39;t have to
+    </td>
+    <td width="33%" valign="top">
       <strong><a href="https://www.kitze.io/sponsors?ref=kitze%2Freleaseflow-sdk">Your product here</a></strong><br>
       Reach developers in every kitze repo.
     </td>
